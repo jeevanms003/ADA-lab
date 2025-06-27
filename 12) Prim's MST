@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <utility>
+using namespace std;
+
+const int INF = 1e9;
+
+// Function to find MST using Prim's Algorithm
+int primMST(int n, vector<vector<pair<int, int>>> &adj) {
+    vector<bool> inMST(n, false);         // To track visited nodes
+    vector<int> minWeight(n, INF);        // Min weight to reach each node
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    int totalCost = 0;
+    minWeight[0] = 0;                     // Start from vertex 0
+    pq.push({0, 0});                      // {weight, node}
+
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        int weight = pq.top().first;
+        pq.pop();
+
+        if (inMST[u])
+            continue;
+
+        inMST[u] = true;
+        totalCost += weight;
+        cout << "Included Vertex: " << u << " with edge cost: " << weight << endl;
+
+        for (auto &[v, w] : adj[u]) {
+            if (!inMST[v] && w < minWeight[v]) {
+                minWeight[v] = w;
+                pq.push({w, v});
+            }
+        }
+    }
+
+    return totalCost;
+}
+
+int main() {
+    int n, m;
+    cout << "Enter number of vertices and edges: ";
+    cin >> n >> m;
+
+    vector<vector<pair<int, int>>> adj(n);  // adjacency list
+
+    cout << "Enter edges (u v weight):\n";
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});  // because undirected
+    }
+
+    int cost = primMST(n, adj);
+    cout << "Minimum Cost of Spanning Tree: " << cost << endl;
+
+    return 0;
+}
