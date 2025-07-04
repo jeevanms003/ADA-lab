@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfs(int u, const vector<vector<int>>& adj, vector<bool>& visited) {
+    visited[u] = true;
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            dfs(v, adj, visited);
+        }
+    }
+}
+
+bool isConnected(const vector<vector<int>>& adj) {
+    int V = adj.size();
+    vector<bool> visited(V, false);
+
+    // Start DFS from vertex 0 (assuming graph is non-empty)
+    dfs(0, adj, visited);
+
+    // Check if all vertices are visited
+    for (bool v : visited) {
+        if (!v) return false;
+    }
+    return true;
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of vertices: ";
+    cin >> V;
+    cout << "Enter number of edges: ";
+    cin >> E;
+
+    vector<vector<int>> adj(V);
+    cout << "Enter undirected edges (u v) 0-based indexing:\n";
+    for (int i = 0; i < E; i++) {
+        int u, v; cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    if (isConnected(adj))
+        cout << "The graph is connected.\n";
+    else
+        cout << "The graph is NOT connected.\n";
+
+    return 0;
+}
