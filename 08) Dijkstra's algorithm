@@ -1,0 +1,72 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+
+using namespace std;
+
+typedef pair<int, int> pii;  // pair<distance, vertex>
+
+void dijkstra(int src, const vector<vector<pii>>& adj) {
+    int V = adj.size();
+    vector<int> dist(V, numeric_limits<int>::max());
+    dist[src] = 0;
+
+    // Min-heap priority queue: (distance, vertex)
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    pq.push({0, src});
+
+    while (!pq.empty()) {
+        int currDist = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+        // If this distance is not updated distance, skip
+        if (currDist > dist[u]) continue;
+
+        // Relax all adjacent edges
+        for (auto edge : adj[u]) {
+            int v = edge.first;
+            int weight = edge.second;
+            if (dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+
+    // Print shortest distances
+    cout << "Vertex\tDistance from Source (" << src << ")\n";
+    for (int i = 0; i < V; i++) {
+        cout << i << "\t";
+        if (dist[i] == numeric_limits<int>::max())
+            cout << "INF\n";
+        else
+            cout << dist[i] << "\n";
+    }
+}
+
+int main() {
+    int V, E, src;
+    cout << "Enter number of vertices: ";
+    cin >> V;
+    cout << "Enter number of edges: ";
+    cin >> E;
+
+    vector<vector<pii>> adj(V);  // adjacency list: node -> list of (neighbor, weight)
+
+    cout << "Enter edges in format: u v w (0-based indexing)\n";
+    for (int i = 0; i < E; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});  // For undirected graph, remove if directed
+    }
+
+    cout << "Enter source vertex: ";
+    cin >> src;
+
+    dijkstra(src, adj);
+
+    return 0;
+}
