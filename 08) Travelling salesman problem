@@ -1,0 +1,126 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <limits>
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
+
+struct City {
+    double x, y;
+};
+
+// Calculate Euclidean distance rounded to nearest integer
+int distance(const City& a, const City& b) {
+    return (int)round(sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y)));
+}
+
+int calculateTourCost(const vector<int>& path, const vector<vector<int>>& dist) {
+    int cost = 0;
+    int N = path.size();
+    for (int i = 0; i < N - 1; i++)
+        cost += dist[path[i]][path[i + 1]];
+    cost += dist[path[N - 1]][path[0]];
+    return cost;
+}
+
+void tspBacktracking(const vector<vector<int>>& dist, vector<bool>& visited, vector<int>& currentPath,
+                     int currentCost, int& minCost, vector<int>& bestPath) {
+    int N = dist.size();
+    if (currentPath.size() == N) {
+        currentCost += dist[currentPath.back()][currentPath[0]];
+        if (currentCost < minCost) {
+            minCost = currentCost;
+            bestPath = currentPath;
+        }
+        return;
+    }
+
+    for (int city = 0; city < N; city++) {
+        if (!visited[city]) {
+            int lastCity = currentPath.back();
+            int newCost = currentCost + dist[lastCity][city];
+            if (newCost < minCost) {
+                visited[city] = true;
+                currentPath.push_back(city);
+                tspBacktracking(dist, visited, currentPath, newCost, minCost, bestPath);
+                currentPath.pop_back();
+                visited[city] = false;
+            }
+        }
+    }
+}
+
+int tspNearestNeighbor(const vector<vector<int>>& dist, vector<int>& approxPath) {
+    int N = dist.size();
+    vector<bool> visited(N, false);
+    int currentCity = 0;
+    approxPath.push_back(currentCity);
+    visited[currentCity] = true;
+    int totalCost = 0;
+
+    for (int i = 1; i < N; i++) {
+        int nextCity = -1;
+        int minDist = INF;
+        for (int city = 0; city < N; city++) {
+            if (!visited[city] && dist[currentCity][city] < minDist) {
+                minDist = dist[currentCity][city];
+                nextCity = city;
+            }
+        }
+        visited[nextCity] = true;
+        approxPath.push_back(nextCity);
+        totalCost += minDist;
+        currentCity = nextCity;
+    }
+
+    totalCost += dist[currentCity][approxPath[0]];
+    return totalCost;
+}
+
+int main() {
+    int N;
+    cout << "Enter number of cities: ";
+    cin >> N;
+
+    vector<City> cities(N);
+    cout << "Enter coordinates (x y) for each city:\n";
+    for (int i = 0; i < N; i++) {
+        cin >> cities[i].x >> cities[i].y;
+    }
+
+    // Build distance matrix using Euclidean distance
+    vector<vector<int>> dist(N, vector<int>(N));
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (i == j) dist[i][j] = 0;
+            else dist[i][j] = distance(cities[i], cities[j]);
+        }
+    }
+
+    // Optimal TSP via backtracking
+    vector<bool> visited(N, false);
+    vector<int> currentPath = {0};
+    visited[0] = true;
+    int minCost = INF;
+    vector<int> bestPath;
+
+    tspBacktracking(dist, visited, currentPath, 0, minCost, bestPath);
+
+    cout << "Optimal TSP cost: " << minCost << "\nOptimal path: ";
+    for (int city : bestPath) cout << city << " ";
+    cout << bestPath[0] << "\n\n";
+
+    // Approximate TSP via nearest neighbor
+    vector<int> approxPath;
+    int approxCost = tspNearestNeighbor(dist, approxPath);
+
+    cout << "Approximate TSP cost (Nearest Neighbor): " << approxCost << "\nApproximate path: ";
+    for (int city : approxPath) cout << city << " ";
+    cout << approxPath[0] << "\n\n";
+
+    double errorPercent = ((double)(approxCost - minCost) / minCost) * 100.0;
+    cout << "Approximation error: " << errorPercent << "%\n";
+
+    return 0;
+}
