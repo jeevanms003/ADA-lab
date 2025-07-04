@@ -1,0 +1,51 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+void bfsReachable(const vector<vector<int>>& adj, int start) {
+    int V = adj.size();
+    vector<bool> visited(V, false);
+    queue<int> q;
+
+    visited[start] = true;
+    q.push(start);
+
+    cout << "Nodes reachable from node " << start << ": ";
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        cout << u << " ";
+
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+    cout << "\n";
+}
+
+int main() {
+    int V, E, start;
+    cout << "Enter number of vertices: ";
+    cin >> V;
+    cout << "Enter number of edges: ";
+    cin >> E;
+
+    vector<vector<int>> adj(V);
+    cout << "Enter directed edges (u v) 0-based indexing:\n";
+    for (int i = 0; i < E; i++) {
+        int u, v; cin >> u >> v;
+        adj[u].push_back(v);
+    }
+
+    cout << "Enter starting node: ";
+    cin >> start;
+
+    bfsReachable(adj, start);
+
+    return 0;
+}
