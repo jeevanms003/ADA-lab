@@ -1,0 +1,54 @@
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+void dfsTopo(int u, const vector<vector<int>>& adj, vector<bool>& visited, stack<int>& stk) {
+    visited[u] = true;
+    for (int v : adj[u]) {
+        if (!visited[v])
+            dfsTopo(v, adj, visited, stk);
+    }
+    stk.push(u);
+}
+
+vector<int> topologicalSort(const vector<vector<int>>& adj) {
+    int V = adj.size();
+    vector<bool> visited(V, false);
+    stack<int> stk;
+
+    for (int i = 0; i < V; i++) {
+        if (!visited[i])
+            dfsTopo(i, adj, visited, stk);
+    }
+
+    vector<int> topoOrder;
+    while (!stk.empty()) {
+        topoOrder.push_back(stk.top());
+        stk.pop();
+    }
+    return topoOrder;
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of vertices: ";
+    cin >> V;
+    cout << "Enter number of edges: ";
+    cin >> E;
+
+    vector<vector<int>> adj(V);
+    cout << "Enter directed edges (u v) 0-based indexing:\n";
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+    }
+
+    vector<int> topoOrder = topologicalSort(adj);
+    cout << "Topological Ordering:\n";
+    for (int v : topoOrder) cout << v << " ";
+    cout << "\n";
+
+    return 0;
+}
