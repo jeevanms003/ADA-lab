@@ -5,14 +5,13 @@
 
 using namespace std;
 
-typedef pair<int, int> pii;  // pair<distance, vertex>
+typedef pair<int, int> pii;
 
 void dijkstra(int src, const vector<vector<pii>>& adj) {
     int V = adj.size();
     vector<int> dist(V, numeric_limits<int>::max());
     dist[src] = 0;
 
-    // Min-heap priority queue: (distance, vertex)
     priority_queue<pii, vector<pii>, greater<pii>> pq;
     pq.push({0, src});
 
@@ -21,10 +20,8 @@ void dijkstra(int src, const vector<vector<pii>>& adj) {
         int u = pq.top().second;
         pq.pop();
 
-        // If this distance is not updated distance, skip
         if (currDist > dist[u]) continue;
 
-        // Relax all adjacent edges
         for (auto edge : adj[u]) {
             int v = edge.first;
             int weight = edge.second;
@@ -35,7 +32,6 @@ void dijkstra(int src, const vector<vector<pii>>& adj) {
         }
     }
 
-    // Print shortest distances
     cout << "Vertex\tDistance from Source (" << src << ")\n";
     for (int i = 0; i < V; i++) {
         cout << i << "\t";
@@ -53,14 +49,14 @@ int main() {
     cout << "Enter number of edges: ";
     cin >> E;
 
-    vector<vector<pii>> adj(V);  // adjacency list: node -> list of (neighbor, weight)
+    vector<vector<pii>> adj(V);
 
     cout << "Enter edges in format: u v w (0-based indexing)\n";
     for (int i = 0; i < E; i++) {
         int u, v, w;
         cin >> u >> v >> w;
         adj[u].push_back({v, w});
-        adj[v].push_back({u, w});  // For undirected graph, remove if directed
+        adj[v].push_back({u, w});
     }
 
     cout << "Enter source vertex: ";
@@ -70,3 +66,4 @@ int main() {
 
     return 0;
 }
+
