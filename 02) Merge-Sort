@@ -7,60 +7,57 @@
 
 using namespace std;
 using namespace chrono;
-const int THREAD_THRESHOLD = 10000; // Only use threads for large segments
+const int THREAD_THRESHOLD = 10000;
 
 void merge(vector<int>& arr, int left, int mid, int right) {
-    vector<int> leftArr(arr.begin() + left, arr.begin() + mid + 1);
-    vector<int> rightArr(arr.begin() + mid + 1, arr.begin() + right + 1);
-    size_t i = 0, j = 0;
-    int k = left;
-    while(i < leftArr.size() && j < rightArr.size()) {
-        arr[k++] = (leftArr[i] < rightArr[j]) ? leftArr[i++] : rightArr[j++];
-    }
-    while(i < leftArr.size()) arr[k++] = leftArr[i++];
-    while(j < rightArr.size()) arr[k++] = rightArr[j++];
+    vector<int> leftArr(arr.begin() + left, arr.begin() + mid + 1);
+    vector<int> rightArr(arr.begin() + mid + 1, arr.begin() + right + 1);
+    size_t i = 0, j = 0;
+    int k = left;
+    while (i < leftArr.size() && j < rightArr.size()) {
+        arr[k++] = (leftArr[i] < rightArr[j]) ? leftArr[i++] : rightArr[j++];
+    }
+    while (i < leftArr.size()) arr[k++] = leftArr[i++];
+    while (j < rightArr.size()) arr[k++] = rightArr[j++];
 }
-
 
 void parallelMergeSort(vector<int>& arr, int left, int right) {
-    if(left >= right) return;
-    int mid = left + (right - left) / 2;
-    if(right - left > THREAD_THRESHOLD) {
-        thread t1(parallelMergeSort, ref(arr), left, mid);
-        thread t2(parallelMergeSort, ref(arr), mid + 1, right);
-        t1.join();
-        t2.join();
-    } else {
-        parallelMergeSort(arr, left, mid);
-        parallelMergeSort(arr, mid + 1, right);
-    }
-    merge(arr, left, mid, right);
+    if (left >= right) return;
+    int mid = left + (right - left) / 2;
+    if (right - left > THREAD_THRESHOLD) {
+        thread t1(parallelMergeSort, ref(arr), left, mid);
+        thread t2(parallelMergeSort, ref(arr), mid + 1, right);
+        t1.join();
+        t2.join();
+    } else {
+        parallelMergeSort(arr, left, mid);
+        parallelMergeSort(arr, mid + 1, right);
+    }
+    merge(arr, left, mid, right);
 }
-
 
 vector<int> generateRandomVector(int n) {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dis(1, 1000000);
-    vector<int> v(n);
-    for(int& x : v) x = dis(gen);
-    return v;
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(1, 1000000);
+    vector<int> v(n);
+    for (int& x : v) x = dis(gen);
+    return v;
 }
 
-
 int main() {
-    ofstream output("parallel_mergesort_times.csv");
-    output << "n,Time(ms)\n";
-    for(int n = 10000; n <= 100000; n += 10000) {
-        vector<int> arr = generateRandomVector(n);
-        auto start = high_resolution_clock::now();
-        parallelMergeSort(arr, 0, n - 1);
-        auto end = high_resolution_clock::now();
-        duration<double, milli> elapsed = end - start;
-        cout << "n = " << n << ", time takes = " << elapsed.count() << " ms" << endl;
-        output << n << "," << elapsed.count() << "\n";
-    }
-    output.close();
-    cout << "Results saved to parallel_mergesort_times.csv" << endl;
-    return 0;
+    ofstream output("parallel_mergesort_times.csv");
+    output << "n,Time(ms)\n";
+    for (int n = 10000; n <= 100000; n += 10000) {
+        vector<int> arr = generateRandomVector(n);
+        auto start = high_resolution_clock::now();
+        parallelMergeSort(arr, 0, n - 1);
+        auto end = high_resolution_clock::now();
+        duration<double, milli> elapsed = end - start;
+        cout << "n = " << n << ", time takes = " << elapsed.count() << " ms" << endl;
+        output << n << "," << elapsed.count() << "\n";
+    }
+    output.close();
+    cout << "Results saved to parallel_mergesort_times.csv" << endl;
+    return 0;
 }
